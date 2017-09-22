@@ -34,10 +34,12 @@ abstract class AbstractElastic
      */
     public function indexObject(array $objectData)
     {
+        $id = empty($objectData[static::IDENTIFIER]) ? null : $objectData[static::IDENTIFIER];
+
         return $this->client->index([
             'index' => $this->createIndexName(),
             'type' => static::ES_TYPE_NAME,
-            'id' => $objectData[static::IDENTIFIER],
+            'id' => $id,
             'body' => $objectData,
         ]);
     }
@@ -66,11 +68,26 @@ abstract class AbstractElastic
      */
     public function deleteObject($objectId)
     {
-        return $this->client->delete([
+        $del = $this->client->delete([
             'index' => $this->createIndexName(),
             'type' => static::ES_TYPE_NAME,
             'id' => $objectId,
         ]);
+
+        return $del;
+    }
+
+    public function hasObjectById($objectId)
+    {
+        try {
+            $a = $this->getObject($objectId);
+            dump(__METHOD__ . '::' . __LINE__);
+            dump($a);die;
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -92,21 +109,20 @@ abstract class AbstractElastic
      *
      * @return array
      */
-    public function searchObject(array $criteria)
+    public function searchObject(array $criteria = [])
     {
-//        $criteria = [
-//            'content' => 'content',
-//        ];
-
         $params = [
             'index' => $this->createIndexName(),
             'type' => static::ES_TYPE_NAME,
-            'body' => [
+        ];
+
+        if (!empty($criteria)) {
+            $params['body'] = [
                 'query' => [
                     'match' => $criteria,
                 ],
-            ],
-        ];
+            ];
+        }
 
         return $this->client->search($params);
     }
