@@ -62,7 +62,7 @@ abstract class AbstractElastic
     }
 
     /**
-     * @param int $objectId
+     * @param string $objectId
      *
      * @return array
      */
@@ -77,21 +77,24 @@ abstract class AbstractElastic
         return $del;
     }
 
+    /**
+     * @param string $objectId
+     *
+     * @return bool
+     */
     public function hasObjectById($objectId)
     {
         try {
-            $a = $this->getObject($objectId);
-            dump(__METHOD__ . '::' . __LINE__);
-            dump($a);die;
+            $response = $this->getObject($objectId);
+
+            return (bool) $response['found'];
         } catch (\Exception $e) {
             return false;
         }
-
-        return true;
     }
 
     /**
-     * @param int $objectId
+     * @param string $objectId
      *
      * @return array
      */
